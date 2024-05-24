@@ -1,5 +1,4 @@
 import pygame
-from env import *
 
 class Music:
     def __init__(self, music_path, volume):

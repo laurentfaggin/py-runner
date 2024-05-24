@@ -1,7 +1,20 @@
 import pygame
 from random import randint
-from env import *
+from dotenv import load_dotenv
 from music import Music
+import os
+
+load_dotenv()
+
+PLAYER_WALK1_PATH = os.getenv('PLAYER_WALK1_PATH')
+PLAYER_WALK2_PATH = os.getenv('PLAYER_WALK2_PATH')
+PLAYER_JUMP_PATH = os.getenv('PLAYER_JUMP_PATH')
+PLAYER_GAME_POSITION = tuple(int(i) for i in os.getenv('PLAYER_GAME_POSITION').strip('()').split(','))
+GRAVITY = int(os.getenv('GRAVITY'))
+JUMP_SOUND_PATH = os.getenv('JUMP_SOUND_PATH')
+MUSIC_VOLUME = os.getenv('MUSIC_VOLUME')
+GROUND_POSITION = os.getenv('GROUND_POSITION')
+SCREEN_WIDTH = int(os.getenv('SCREEN_WIDTH'))
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -15,7 +28,10 @@ class Player(pygame.sprite.Sprite):
         self.rect = self.image.get_rect(midbottom = PLAYER_GAME_POSITION)
         self.gravity = GRAVITY
 
-        self.jump_sound = Music(JUMP_SOUND_PATH, MUSIC_VOLUME)
+        self.jump_sound = Music(JUMP_SOUND_PATH, float(MUSIC_VOLUME))
+
+    def can_jump(self):
+        return self.rect.bottom >= GROUND_POSITION
        
     def player_input(self):
         keys = pygame.key.get_pressed()

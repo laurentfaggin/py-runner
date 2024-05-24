@@ -1,9 +1,35 @@
 import pygame
-from env import *
+import ast
+from dotenv import load_dotenv
+import os
+
+load_dotenv()
+
+pygame.init()
+
+SCREEN_WIDTH = int(os.getenv('SCREEN_WIDTH'))
+SCREEN_HEIGHT = int(os.getenv('SCREEN_HEIGHT'))
+WINDOW_TITLE = os.getenv('WINDOW_TITLE')
+CLOUD_PATH = os.getenv('CLOUD_PATH')
+GROUND_PATH = os.getenv('GROUND_PATH')
+PLAYER_STAND_PATH = os.getenv('PLAYER_STAND_PATH')
+PLAYER_STAND_POSITION = tuple(int(i) for i in os.getenv('PLAYER_STAND_POSITION').strip('()').split(','))
+GAME_NAME = os.getenv('GAME_NAME')
+GAME_NAME_COLOR = ast.literal_eval(os.getenv('GAME_NAME_COLOR'))
+GAME_NAME_POSITION = tuple(int(i) for i in os.getenv('GAME_NAME_POSITION').strip('()').split(','))
+GAME_START_MESSAGE = os.getenv('GAME_START_MESSAGE')
+print(os.getenv('GAME_START_MESSAGE_COLOR'))
+GAME_START_MESSAGE_COLOR = ast.literal_eval(os.getenv('GAME_START_MESSAGE_COLOR'))
+GAME_START_MESSAGE_POSITION = tuple(int(i) for i in os.getenv('GAME_START_MESSAGE_POSITION').strip('()').split(','))
+INTRO_SCREEN_COLOR = ast.literal_eval(os.getenv('INTRO_SCREEN_COLOR'))
+FONT_PATH = os.getenv('FONT_PATH')
+FONT_SIZE = int(os.getenv('FONT_SIZE'))
+FONT = pygame.font.Font(FONT_PATH, FONT_SIZE)
+
 
 class Screen:
     def __init__(self):
-        self.screen = pygame.display.set_mode(SCREEN_SIZE)
+        self.screen = pygame.display.set_mode((SCREEN_WIDTH, SCREEN_HEIGHT))
         pygame.display.set_caption(WINDOW_TITLE)
         self.sky = pygame.image.load(CLOUD_PATH).convert()
         self.sky_reverse = pygame.transform.flip(self.sky, True, False)
