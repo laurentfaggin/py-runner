@@ -42,6 +42,10 @@ class Player(pygame.sprite.Sprite):
             self.rect.x += 5
         if keys[pygame.K_LEFT] and self.rect.left >= 0:
             self.rect.x -= 5
+
+    def reset_position(self):
+        self.rect.midbottom = PLAYER_GAME_POSITION
+        self.gravity = 0
     
     def apply_gravity(self):
         self.gravity += 1

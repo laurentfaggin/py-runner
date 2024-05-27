@@ -34,9 +34,11 @@ class Screen:
         self.sky = pygame.image.load(CLOUD_PATH).convert()
         self.sky_reverse = pygame.transform.flip(self.sky, True, False)
         self.sky_x = 0
+        self.sky_x2 = SCREEN_WIDTH
         self.ground = pygame.image.load(GROUND_PATH).convert()
         self.ground_reverse = pygame.transform.flip(self.ground, True, False)
         self.ground_x = 0
+        self.ground_x2 = SCREEN_WIDTH
 
         self.player_stand = pygame.image.load(PLAYER_STAND_PATH).convert_alpha()
         self.player_stand_rect = self.player_stand.get_rect(center = (PLAYER_STAND_POSITION))
@@ -49,21 +51,26 @@ class Screen:
     
     def draw_background(self):
         self.sky_x -= 0.5
+        self.sky_x2 -= 0.5
         if self.sky_x <= -SCREEN_WIDTH:
-            self.sky_x = 0
-            self.screen.blit(self.sky, (self.sky_x, 0))
-        else:
-            self.screen.blit(self.sky_reverse, (self.sky_x + SCREEN_WIDTH, 0))
-            self.screen.blit(self.sky, (self.sky_x, 0)) 
+            self.sky_x = self.sky_x2 + SCREEN_WIDTH
+        if self.sky_x2 <= -SCREEN_WIDTH:
+            self.sky_x2 = self.sky_x + SCREEN_WIDTH
+        self.screen.blit(self.sky, (self.sky_x, 0)) 
+        self.screen.blit(self.sky_reverse, (self.sky_x2, 0))
 
-        self.ground_x -= 3
+        self.ground_x -= 2.5
+        self.ground_x2 -= 2.5
         if self.ground_x <= -SCREEN_WIDTH:
-            self.ground_x = 0
-            self.screen.blit(self.ground, (self.ground_x, 300))
-        else:
-            self.screen.blit(self.ground_reverse, (self.ground_x + SCREEN_WIDTH, 300))
-            self.screen.blit(self.ground, (self.ground_x, 300))
-       
+            self.ground_x = self.ground_x2 + SCREEN_WIDTH
+        if self.ground_x2 <= -SCREEN_WIDTH:
+            self.ground_x2 = self.ground_x + SCREEN_WIDTH
+        self.screen.blit(self.ground, (self.ground_x, 300))
+        self.screen.blit(self.ground_reverse, (self.ground_x2, 300))
+
+    def modify_background(self, path):
+        self.ground = pygame.image.load(path).convert()
+        self.ground_reverse = pygame.transform.flip(self.ground, True, False)
 
     def draw_text(self, text, color, position):
         text_surface = FONT.render(text, False, color)

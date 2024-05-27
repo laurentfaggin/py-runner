@@ -21,13 +21,13 @@ GAME_MUSIC_PATH = os.getenv('GAME_MUSIC_PATH')
 MUSIC_VOLUME = float(os.getenv('MUSIC_VOLUME'))
 FONT = os.getenv('FONT')
 
-
 class Game:
     def __init__(self):
         self.screen = Screen()
         self.clock = pygame.time.Clock()
         self.game_active = GAME_ACTIVE
         self.start_time = 0
+        self.level = 1
         self.score = 0
         self.bg_music = Music(GAME_MUSIC_PATH, MUSIC_VOLUME)
         self.bg_music.play()
@@ -67,19 +67,33 @@ class Game:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 self.game_active = True
                 self.start_time = int(pygame.time.get_ticks() / 1000)
+                self.player.reset_position()
         
         if self.game_active:
             if event.type == self.obstacle_timer:
                 self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+    
+    def handle_level(self):
+        self.score = self.display_score()
+        if self.score < 10:
+            self.screen.modify_background(os.getenv('GROUND_PATH'))
+        elif self.score < 20:
+            self.screen.modify_background(os.getenv('GROUND2_PATH'))
+        elif self.score < 30:
+            self.screen.modify_background(os.getenv('GROUND3_PATH'))
+        elif self.score >= 30:
+            self.screen.modify_background(os.getenv('GROUND4_PATH'))
 
     def game_loop(self):
         while True:
             for event in pygame.event.get():
-                self.handle_event(event)
+                self.handle_event(event)                
             
             if self.game_active:
+                self.handle_level()
                 self.screen.draw_background()
                 self.screen.screen.blit(self.player.image, self.player.rect)
+                self.score = self.display_score()
                 self.screen.draw_text(f'Score: {self.display_score()}', SCORE_COLOR, SCORE_POSITION)
                 self.player.update()
                 self.obstacle_group.draw(self.screen.screen)
