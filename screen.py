@@ -83,3 +83,10 @@ class Screen:
         self.screen.blit(self.player_stand, self.player_stand_rect)
         self.screen.blit(self.game_name, self.game_name_rect)
         self.screen.blit(self.game_message, self.game_message_rect)
+        
+    def draw_change_level(self, level):
+        self.screen.fill(INTRO_SCREEN_COLOR)
+        self.screen.blit(self.player_stand, self.player_stand_rect)
+        self.draw_text(f'Level {level}', GAME_NAME_COLOR, GAME_NAME_POSITION)
+        self.draw_text('Get Ready!', GAME_START_MESSAGE_COLOR, GAME_START_MESSAGE_POSITION)
+        pygame.display.update()

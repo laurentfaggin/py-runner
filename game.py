@@ -1,4 +1,5 @@
 import pygame
+import time
 from sys import exit
 from random import choice
 from Player import Player
@@ -6,6 +7,7 @@ from Obstacle import Obstacle
 from screen import Screen
 from music import Music
 from dotenv import load_dotenv
+
 import os
 
 load_dotenv()
@@ -21,29 +23,40 @@ GAME_MUSIC_PATH = os.getenv('GAME_MUSIC_PATH')
 MUSIC_VOLUME = float(os.getenv('MUSIC_VOLUME'))
 FONT = os.getenv('FONT')
 
+# Voir pour le score qui n'arrete pas de s'incrémenter et les obstacles aussi lorsque le level up
 class Game:
     def __init__(self):
         self.screen = Screen()
         self.clock = pygame.time.Clock()
         self.game_active = GAME_ACTIVE
         self.start_time = 0
+        self.level_start_time = 0
         self.level = 1
         self.score = 0
         self.bg_music = Music(GAME_MUSIC_PATH, MUSIC_VOLUME)
         self.bg_music.play()
         self.player = Player()
         self.obstacle_group = pygame.sprite.Group()
+        self.changeLevel = False
         global FONT
         FONT = pygame.font.Font(FONT_PATH, FONT_SIZE)
         self.obstacle_timer = pygame.USEREVENT + 1
+        self.score_timer = pygame.USEREVENT + 2
         pygame.time.set_timer(self.obstacle_timer, 1500)
+        pygame.time.set_timer(self.score_timer, 1000)
 
     def display_score(self):
-        current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
-        score_surf = FONT.render(f'Score: {current_time}', False, SCORE_COLOR)
+        # if not self.changeLevel:
+        #     current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
+        #     self.score = current_time
+        # score_surf = FONT.render(f'Score: {current_time}', False, SCORE_COLOR)
+        # score_rect = score_surf.get_rect(center = SCORE_POSITION)
+        # self.screen.screen.blit(score_surf, score_rect)
+        # return self.score
+        score_surf = FONT.render(f'Score: {self.score}', False, SCORE_COLOR)
         score_rect = score_surf.get_rect(center = SCORE_POSITION)
         self.screen.screen.blit(score_surf, score_rect)
-        return current_time
+        return self.score
     
     def collision_sprite(self):
         if pygame.sprite.spritecollide(self.player, self.obstacle_group, False):
@@ -55,7 +68,7 @@ class Game:
         if event.type == pygame.QUIT:
             pygame.quit()
             exit()
-        if self.game_active:
+        if self.game_active and not self.changeLevel:
             if event.type == pygame.MOUSEBUTTONDOWN:
                 if self.player.rect.collidepoint(event.pos) and self.player.bottom >= 300:
                     self.player.gravity = -20
@@ -63,26 +76,61 @@ class Game:
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_SPACE and self.player.rect.bottom >= 300:
                     self.player.gravity = -20
+            
+            if event.type == self.obstacle_timer:
+                self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+
+            if event.type == self.score_timer:
+                self.score += 1
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 self.game_active = True
-                self.start_time = int(pygame.time.get_ticks() / 1000)
+                # self.start_time = int(pygame.time.get_ticks() / 1000)
+                # self.level_start_time = self.start_time
                 self.player.reset_position()
         
-        if self.game_active:
-            if event.type == self.obstacle_timer:
-                self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+        # if self.game_active and not self.changeLevel:
+        #     if event.type == self.obstacle_timer:
+        #         self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
     
     def handle_level(self):
-        self.score = self.display_score()
-        if self.score < 10:
-            self.screen.modify_background(os.getenv('GROUND_PATH'))
-        elif self.score < 20:
-            self.screen.modify_background(os.getenv('GROUND2_PATH'))
-        elif self.score < 30:
-            self.screen.modify_background(os.getenv('GROUND3_PATH'))
-        elif self.score >= 30:
-            self.screen.modify_background(os.getenv('GROUND4_PATH'))
+        if self.changeLevel:
+            return
+        else:
+            self.score = self.display_score()
+            if self.score < 10:
+                self.screen.modify_background(os.getenv('GROUND_PATH'))
+                self.level = 1
+            elif self.score < 20:
+                if self.level != 2:
+                    self.level = 2
+                    self.changeLevel = True
+                    self.screen.draw_change_level(self.level)
+                    pygame.display.update()
+                    pygame.time.delay(2000)
+                    self.changeLevel = False
+                    # self.player.reset_position()
+                self.screen.modify_background(os.getenv('GROUND2_PATH'))
+            elif self.score < 30:
+                if self.level != 3:
+                    self.level = 3
+                    self.changeLevel = True
+                    self.screen.draw_change_level(self.level)
+                    pygame.display.update()
+                    pygame.time.delay(2000)
+                    self.changeLevel = False
+                    # self.player.reset_position()
+                self.screen.modify_background(os.getenv('GROUND3_PATH'))
+            elif self.score >= 30:
+                if self.level != 4:
+                    self.level = 4
+                    self.changeLevel = True
+                    self.screen.draw_change_level(self.level)
+                    pygame.display.update()
+                    pygame.time.delay(2000)
+                    self.changeLevel = False
+                    # self.player.reset_position()
+                self.screen.modify_background(os.getenv('GROUND4_PATH'))
 
     def game_loop(self):
         while True:
@@ -90,15 +138,16 @@ class Game:
                 self.handle_event(event)                
             
             if self.game_active:
-                self.handle_level()
-                self.screen.draw_background()
-                self.screen.screen.blit(self.player.image, self.player.rect)
-                self.score = self.display_score()
-                self.screen.draw_text(f'Score: {self.display_score()}', SCORE_COLOR, SCORE_POSITION)
-                self.player.update()
-                self.obstacle_group.draw(self.screen.screen)
-                self.obstacle_group.update()
-                self.game_active = self.collision_sprite()
+                if not self.changeLevel:
+                    self.handle_level()
+                    self.screen.draw_background()
+                    self.screen.screen.blit(self.player.image, self.player.rect)
+                    self.display_score()
+                    self.screen.draw_text(f'Score: {self.display_score()}', SCORE_COLOR, SCORE_POSITION)
+                    self.player.update()
+                    self.obstacle_group.draw(self.screen.screen)
+                    self.obstacle_group.update()
+                    self.game_active = self.collision_sprite()
             else:
                 self.screen.draw_intro()
 
