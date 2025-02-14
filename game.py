@@ -23,7 +23,6 @@ GAME_MUSIC_PATH = os.getenv('GAME_MUSIC_PATH')
 MUSIC_VOLUME = float(os.getenv('MUSIC_VOLUME'))
 FONT = os.getenv('FONT')
 
-# Voir pour le score qui n'arrete pas de s'incrémenter et les obstacles aussi lorsque le level up
 class Game:
     def __init__(self):
         self.screen = Screen()
@@ -37,6 +36,7 @@ class Game:
         self.bg_music.play()
         self.player = Player()
         self.obstacle_group = pygame.sprite.Group()
+        self.obstacle_speed = 6
         self.changeLevel = False
         global FONT
         FONT = pygame.font.Font(FONT_PATH, FONT_SIZE)
@@ -46,13 +46,6 @@ class Game:
         pygame.time.set_timer(self.score_timer, 1000)
 
     def display_score(self):
-        # if not self.changeLevel:
-        #     current_time = int(pygame.time.get_ticks() / 1000) - self.start_time
-        #     self.score = current_time
-        # score_surf = FONT.render(f'Score: {current_time}', False, SCORE_COLOR)
-        # score_rect = score_surf.get_rect(center = SCORE_POSITION)
-        # self.screen.screen.blit(score_surf, score_rect)
-        # return self.score
         score_surf = FONT.render(f'Score: {self.score}', False, SCORE_COLOR)
         score_rect = score_surf.get_rect(center = SCORE_POSITION)
         self.screen.screen.blit(score_surf, score_rect)
@@ -61,6 +54,8 @@ class Game:
     def collision_sprite(self):
         if pygame.sprite.spritecollide(self.player, self.obstacle_group, False):
             self.obstacle_group.empty()
+            self.score = 0
+            self.level = 1
             return False
         else: return True
 
@@ -85,13 +80,17 @@ class Game:
         else:
             if event.type == pygame.KEYDOWN and event.key == pygame.K_SPACE:
                 self.game_active = True
-                # self.start_time = int(pygame.time.get_ticks() / 1000)
-                # self.level_start_time = self.start_time
                 self.player.reset_position()
-        
-        # if self.game_active and not self.changeLevel:
-        #     if event.type == self.obstacle_timer:
-        #         self.obstacle_group.add(Obstacle(choice(['fly', 'snail', 'snail', 'snail'])))
+    
+    def handleChange_level(self):
+        self.changeLevel = True
+        self.screen.draw_change_level(self.level)
+        pygame.display.update()
+        pygame.time.delay(2000)
+        self.changeLevel = False
+        self.player.reset_position()
+        self.obstacle_group.empty()
+        self.obstacle_speed += 2
     
     def handle_level(self):
         if self.changeLevel:
@@ -99,37 +98,22 @@ class Game:
         else:
             self.score = self.display_score()
             if self.score < 10:
-                self.screen.modify_background(os.getenv('GROUND_PATH'))
+                self.screen.modify_background(os.getenv('GROUND_PATH'))                
                 self.level = 1
             elif self.score < 20:
                 if self.level != 2:
                     self.level = 2
-                    self.changeLevel = True
-                    self.screen.draw_change_level(self.level)
-                    pygame.display.update()
-                    pygame.time.delay(2000)
-                    self.changeLevel = False
-                    # self.player.reset_position()
+                    self.handleChange_level()                    
                 self.screen.modify_background(os.getenv('GROUND2_PATH'))
             elif self.score < 30:
                 if self.level != 3:
-                    self.level = 3
-                    self.changeLevel = True
-                    self.screen.draw_change_level(self.level)
-                    pygame.display.update()
-                    pygame.time.delay(2000)
-                    self.changeLevel = False
-                    # self.player.reset_position()
+                    self.level = 3                    
+                    self.handleChange_level()
                 self.screen.modify_background(os.getenv('GROUND3_PATH'))
             elif self.score >= 30:
                 if self.level != 4:
                     self.level = 4
-                    self.changeLevel = True
-                    self.screen.draw_change_level(self.level)
-                    pygame.display.update()
-                    pygame.time.delay(2000)
-                    self.changeLevel = False
-                    # self.player.reset_position()
+                    self.handleChange_level()
                 self.screen.modify_background(os.getenv('GROUND4_PATH'))
 
     def game_loop(self):
