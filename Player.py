@@ -15,6 +15,7 @@ JUMP_SOUND_PATH = os.getenv('JUMP_SOUND_PATH')
 MUSIC_VOLUME = os.getenv('MUSIC_VOLUME')
 GROUND_POSITION = os.getenv('GROUND_POSITION')
 SCREEN_WIDTH = int(os.getenv('SCREEN_WIDTH'))
+PLAYER_SPEED = int(os.getenv('PLAYER_SPEED'))
 
 class Player(pygame.sprite.Sprite):
     def __init__(self):
@@ -39,9 +40,9 @@ class Player(pygame.sprite.Sprite):
             self.gravity = -20
             self.jump_sound.play(0)
         if keys[pygame.K_RIGHT] and self.rect.right <= SCREEN_WIDTH:
-            self.rect.x += 5
+            self.rect.x += PLAYER_SPEED
         if keys[pygame.K_LEFT] and self.rect.left >= 0:
-            self.rect.x -= 5
+            self.rect.x -= PLAYER_SPEED
 
     def reset_position(self):
         self.rect.midbottom = PLAYER_GAME_POSITION
@@ -56,7 +57,6 @@ class Player(pygame.sprite.Sprite):
     def animation_state(self):
         if self.rect.bottom < 300:
             self.image = self.player_jump
-
         else:
             self.player_index += 0.1
             if self.player_index >= len(self.player_walk): self.player_index = 0
